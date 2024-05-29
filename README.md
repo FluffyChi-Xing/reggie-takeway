@@ -1,6 +1,8 @@
 # reggie-background
 
-This template should help get you started developing with Vue 3 in Vite.
+黑马瑞吉外卖后台管理系统，基于Vue & Element-Plus & TailwindCSS开发。
+![image](https://github.com/FluffyChi-Xing/reggie-takeway/assets/121754413/8bbee5fa-7d75-4531-86eb-6a76bb14d385)
+
 
 ## Recommended IDE Setup
 
