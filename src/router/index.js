@@ -8,6 +8,23 @@ import DishPage from "@/views/dishes/DishPage.vue";
 import PressPage from "@/views/PressPage/PressPage.vue";
 import SetMeal from "@/views/SetMeals/SetMeal.vue";
 import EmployeePage from "@/views/employee/EmployeePage.vue";
+import OrderPage from "@/views/OrderManage/OrderPage.vue";
+import CategoryPage from "@/views/CategoryPage/CategoryPage.vue";
+import NoFoundPage from "@/views/404/NoFoundPage.vue";
+
+//路由名单
+const allRoutes = [
+    '/',
+    '/login',
+    '/cat',
+    '/dish',
+    '/set',
+    '/employee',
+    '/order',
+    '/layout',
+    '/404'
+]
+
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -49,6 +66,22 @@ const router = createRouter({
             title: '瑞吉外卖管理端 | 员工管理',
           },
         },
+        {
+          path: '/order',
+          name: 'order',
+          component: OrderPage,
+          meta: {
+            title: '瑞吉外卖管理端 | 订单管理'
+          },
+        },
+        {
+          path: '/cat',
+          name: 'category',
+          component: CategoryPage,
+          meta: {
+            title: '瑞吉外卖管理端 | 分类管理',
+          },
+        },
       ],
       meta: {
         title: '瑞吉外卖管理端'
@@ -69,12 +102,23 @@ const router = createRouter({
       meta: {
         title: '瑞吉外卖管理端 | 展示'
       }
+    },
+    {
+      path: '/404',
+      name: '404',
+      component: NoFoundPage,
+      meta: {
+        title: '瑞吉外卖管理端 | 页面走失了'
+      },
     }
   ]
 })
 router.beforeEach(async (to) => {
   if (to.meta.title) {
     document.title = to.meta.title;
+  }
+  if (!allRoutes.includes(to.fullPath)) {
+    await router.replace('/404')
   }
   Nprogress.start()
 })

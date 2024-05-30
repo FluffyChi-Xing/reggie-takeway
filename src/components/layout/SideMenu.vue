@@ -31,6 +31,10 @@ const checkPath = (path) => {
       return '套餐管理'
     case '/employee':
       return '职工管理'
+    case '/order':
+      return '订单管理'
+    case '/cat':
+      return '分类管理'
   }
 }
 const jumpTo = (path) => {
@@ -56,6 +60,12 @@ const checkRoute = () => {
             break;
       case '/employee':
         defaultActive.value = '4'
+            break;
+      case '/order':
+        defaultActive.value= '5'
+            break;
+      case '/cat':
+        defaultActive.value = '6'
             break;
     }
   })
@@ -84,7 +94,11 @@ watch(() => route.fullPath, () => {
     >
       <!-- title -->
       <el-menu-item class="bg-[#262628] mb-4 box-border title-border">
-        <span class="mx-auto text-[15px] font-bold">瑞吉外卖</span>
+        <span class="mx-auto text-[15px] font-bold">
+          <RouterLink to="/">
+            瑞吉外卖
+          </RouterLink>
+        </span>
       </el-menu-item>
       <el-menu-item index="1" @click="jumpTo('/layout')">
         <el-icon>
@@ -104,11 +118,11 @@ watch(() => route.fullPath, () => {
         <el-icon><User /></el-icon>
         <span>职工管理</span>
       </el-menu-item>
-      <el-menu-item index="5">
+      <el-menu-item index="5" @click="jumpTo('/order')">
         <el-icon><Files /></el-icon>
         <span>订单管理</span>
       </el-menu-item>
-      <el-menu-item index="6">
+      <el-menu-item index="6" @click="jumpTo('/cat')">
         <el-icon><Box /></el-icon>
         <span>分类管理</span>
       </el-menu-item>
