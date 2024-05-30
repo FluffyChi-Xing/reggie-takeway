@@ -24,6 +24,7 @@ const props = defineProps({
         :stripe="props.stripe"
         :highlight-current-row="props.highLight"
         @current-change="props.currentChange"
+        style="width: 100%"
     >
       <el-table-column type="selection" v-show="props.select" />
       <el-table-column
@@ -32,12 +33,14 @@ const props = defineProps({
           :type="item.type === true ? 'expand' : ''"
           :label="item.label"
           :prop="item.prop"
+          width="200px"
       >
         <template v-if="item.type === true" #default="scope">
           <div class="w-full h-auto relative block p-4">
             <p class="w-full h-auto leading-[20px] whitespace-pre-line text-ellipsis overflow-hidden">
               <img :src="scope.row.image" :alt="scope.row.name" class="w-[100px] h-[100px] cursor-pointer relative block object-contain" loading="lazy">
             </p>
+            <p>{{ scope.row.info }}</p>
           </div>
         </template>
       </el-table-column>

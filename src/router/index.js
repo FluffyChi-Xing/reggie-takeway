@@ -6,6 +6,8 @@ import DashBoard from "@/views/DashBoard/DashBoard.vue";
 import LoginPage from "@/views/login/LoginPage.vue";
 import DishPage from "@/views/dishes/DishPage.vue";
 import PressPage from "@/views/PressPage/PressPage.vue";
+import SetMeal from "@/views/SetMeals/SetMeal.vue";
+import EmployeePage from "@/views/employee/EmployeePage.vue";
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -30,7 +32,23 @@ const router = createRouter({
           meta: {
             title: '瑞吉外卖管理端 | 菜品管理',
           }
-        }
+        },
+        {
+          path: '/set',
+          name: 'SetMeal',
+          component: SetMeal,
+          meta: {
+            title: '瑞吉外卖管理端 | 套餐管理',
+          },
+        },
+        {
+          path: '/employee',
+          name: 'employee',
+          component: EmployeePage,
+          meta: {
+            title: '瑞吉外卖管理端 | 员工管理',
+          },
+        },
       ],
       meta: {
         title: '瑞吉外卖管理端'

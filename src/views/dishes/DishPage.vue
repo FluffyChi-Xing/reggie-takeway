@@ -30,7 +30,7 @@ const table = reactive({
       prop: 'status'
     },
     {
-      label: '图片',
+      label: '介绍',
       prop: 'image',
       type: true,
     },
@@ -51,7 +51,8 @@ const table = reactive({
       time: '2024-04-15',
       status: '起售',
       flavor: '川菜',
-      image: 'https://img95.699pic.com/photo/50171/9675.jpg_wh860.jpg'
+      image: 'https://img95.699pic.com/photo/50171/9675.jpg_wh860.jpg',
+      info: 'ohqwufhwuhfwqhfuiwbfhbwvbwivbibwiuvbiqwbvuiwbvibwqivbwubvub'
     },
     {
       id: 2,
@@ -60,7 +61,8 @@ const table = reactive({
       time: '2024-04-15',
       status: '起售',
       flavor: '川菜',
-      image: 'https://tse1-mm.cn.bing.net/th/id/OIP-C.Bj936iOmWVSxWOYXL8l5IQHaEK?rs=1&pid=ImgDetMain'
+      image: 'https://tse1-mm.cn.bing.net/th/id/OIP-C.Bj936iOmWVSxWOYXL8l5IQHaEK?rs=1&pid=ImgDetMain',
+      info: 'ohqwufhwuhfwqhfuiwbfhbwvbwivbibwiuvbiqwbvuiwbvibwqivbwubvub'
     },
     {
       id: 3,
@@ -69,7 +71,8 @@ const table = reactive({
       time: '2024-04-15',
       status: '停售',
       flavor: '川菜',
-      image: 'https://tse1-mm.cn.bing.net/th/id/OIP-C.3eu6oMWw89b8TuJfEJV_PgHaE8?rs=1&pid=ImgDetMain'
+      image: 'https://tse1-mm.cn.bing.net/th/id/OIP-C.3eu6oMWw89b8TuJfEJV_PgHaE8?rs=1&pid=ImgDetMain',
+      info: 'ohqwufhwuhfwqhfuiwbfhbwvbwivbibwiuvbiqwbvuiwbvibwqivbwubvub'
     },
     {
       id: 4,
@@ -81,7 +84,8 @@ const table = reactive({
       image: 'https://ts1.cn.mm.bing.net/th/id/R-C.49ecf688950caf1f1' +
           'c243cf4c816c0d1?rik=mtkZln0XLEFYKA&riu=http%3a%2f%2fpic.ntimg' +
           '.cn%2ffile%2f20150318%2f19948422_093402464000_2.jpg&ehk=DSuuS9l' +
-          'sW2XV%2fBj0XeI5ZAYNKmreohuJibPd58lDWFg%3d&risl=&pid=ImgRaw&r=0'
+          'sW2XV%2fBj0XeI5ZAYNKmreohuJibPd58lDWFg%3d&risl=&pid=ImgRaw&r=0',
+      info: 'ohqwufhwuhfwqhfuiwbfhbwvbwivbibwiuvbiqwbvuiwbvibwqivbwubvub'
     },
     {
       id: 5,
@@ -90,7 +94,8 @@ const table = reactive({
       time: '2024-04-15',
       status: '起售',
       flavor: '川菜',
-      image: 'https://tse4-mm.cn.bing.net/th/id/OIP-C.1gBW9nY2DyXqJJSN3YgdIQHaE1?rs=1&pid=ImgDetMain'
+      image: 'https://tse4-mm.cn.bing.net/th/id/OIP-C.1gBW9nY2DyXqJJSN3YgdIQHaE1?rs=1&pid=ImgDetMain',
+      info: 'ohqwufhwuhfwqhfuiwbfhbwvbwivbibwiuvbiqwbvuiwbvibwqivbwubvub'
     }
   ],
   highLight: true,

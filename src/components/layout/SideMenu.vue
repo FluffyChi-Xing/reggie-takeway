@@ -27,6 +27,10 @@ const checkPath = (path) => {
       return '仪表盘'
     case '/dish':
       return '菜品管理'
+    case '/set':
+      return '套餐管理'
+    case '/employee':
+      return '职工管理'
   }
 }
 const jumpTo = (path) => {
@@ -46,6 +50,12 @@ const checkRoute = () => {
             break;
       case '/dish':
         defaultActive.value = '2'
+            break;
+      case '/set':
+        defaultActive.value = '3'
+            break;
+      case '/employee':
+        defaultActive.value = '4'
             break;
     }
   })
@@ -86,11 +96,11 @@ watch(() => route.fullPath, () => {
         <el-icon><Dish /></el-icon>
         <span>菜品管理</span>
       </el-menu-item>
-      <el-menu-item index="3">
+      <el-menu-item index="3" @click="jumpTo('/set')">
         <el-icon><Ticket /></el-icon>
         <span>套餐管理</span>
       </el-menu-item>
-      <el-menu-item index="4">
+      <el-menu-item index="4" @click="jumpTo('/employee')">
         <el-icon><User /></el-icon>
         <span>职工管理</span>
       </el-menu-item>
