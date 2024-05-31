@@ -1,8 +1,12 @@
 <script setup>
 import { ref } from "vue";
 import { reactive } from "vue";
+import axios from "axios";
 import TopBanner from "@/components/common/TopBanner.vue";
 import TableComponent from "@/components/common/TableComponent.vue";
+import {ElMessage} from "element-plus";
+
+//拉取菜单数据
 
 //title
 const title = ref('菜品管理')
@@ -133,9 +137,103 @@ const form = reactive({
   name: '',
   price: 0,
   flavor: '',
-  image: '',
+  image: [],
   status: true,
 })
+
+//菜品图片上传业务逻辑
+const fileRef = ref()
+const imageName = ref()
+//获取上传签名
+
+//生成文件名作为key
+const generateFileName = (ossData, file) => {
+  const suffix = file.name.slice(file.name.lastIndexOf('.'));
+  const filename = form.name + '-' + form.price + '-' + form.flavor + '-' + Date.now() + suffix;
+  imageName.value = filename
+  const dir = ossData.dir
+  return dir + filename;
+}
+
+//获取图片
+const getImage = (file,fileList) => {
+  form.image = fileList
+}
+
+//使用oss上传图片
+const handleUpload = async () => {
+  if (form.name !== '' && form.flavor !== '') {
+    //上传图片到oss
+    await axios.get('http://localhost:3000/oss/signature').then(async (res) => {
+      ElMessage({
+        type: "info",
+        message: res.data.message
+      })
+      const ossData = res.data;
+      const file = form.image[0]
+      const key = generateFileName(ossData, file)
+
+      const formData = new FormData()
+
+      // 注意参数的顺序，key 必须是第一位，表示OSS存储文件的路径
+      formData.append('key', key)
+      formData.append('OSSAccessKeyId', ossData.accessId)
+      formData.append('policy', ossData.policy)
+      formData.append('signature', ossData.signature)
+      // 文件上传成功默认返回 204 状态码，可根据需要修改为 200
+      formData.append('success_action_status', '200')
+      // file 必须放在最后一位
+      formData.append('file', form.image[0].raw)
+
+      await axios.post(ossData.host, formData).then((res) => {
+        if (res.status === 200) {
+          ElMessage({
+            type: "info",
+            message: '上传成功'
+          })
+        }
+      }).catch((err) => {
+        console.log(err)
+      })
+      //将oss图片访问链接与其他数据发给后端持久化
+      await axios.post('http://localhost:3000/dish/create', {
+        name: form.name,
+        price: form.price,
+        sort: 1,
+        code: Date.now(),
+        image: `${ossData.host} / ${ossData.dir} ${imageName.value}`,
+        description: '',
+        category_id: 114514,
+        status: 1,
+      }, {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
+              'eyJ1c2VybmFtZSI6InhpYW9taW5nIiwicGFzc3dvcmQiOiIxMTQ1MTQi' +
+              'LCJpYXQiOjE3MTcxNTkwNzYsImV4cCI6MTcxNzE2MDg3Nn0.bU3EKKCYw' +
+              'zvkboGJbmDY7iotkWtZrJI_D2xsUQ-2Cnk'
+        }
+      }).then((res) => {
+        ElMessage({
+          type: "success",
+          message: res.data.message
+        })
+      }).catch((err) => {
+        ElMessage({
+          type: "warning",
+          message: err.data.message
+        })
+      })
+    }).catch((err) => {
+      console.log(err)
+    })
+  } else {
+    ElMessage({
+      type: "warning",
+      message: '请输入相关信息',
+    })
+  }
+}
 </script>
 
 <template>
@@ -215,12 +313,21 @@ const form = reactive({
             />
           </el-form-item>
           <el-form-item label="图片">
-            <el-upload v-model="form.image">
+            <el-upload
+                ref="fileRef"
+                action="#"
+                :auto-upload="false"
+                :limit="1"
+                show-file-list
+                :on-change="getImage"
+                accept=".jpg,.png"
+                :file-list="form.image"
+            >
               <el-button type="primary">上传图片</el-button>
             </el-upload>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" class="w-full" icon="Plus">添加</el-button>
+            <el-button type="primary" class="w-full" icon="Plus" @click="handleUpload">添加</el-button>
           </el-form-item>
         </el-form>
       </div>

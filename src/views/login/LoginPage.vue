@@ -3,6 +3,7 @@ import { reactive } from "vue";
 import { ref } from "vue";
 import {ElMessage} from "element-plus";
 import { useRouter } from "vue-router";
+import axios from "axios";
 
 //router
 const router = useRouter()
@@ -13,22 +14,48 @@ const form = reactive({
   password: ''
 })
 
+//登录处理函数
+const login = async (username, password) => {
+  await axios.post('http://localhost:3000/employee/login', {
+    username: username,
+    password: password,
+  }, {
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    }
+  }).then((res) => {
+    if (res.data.code === 200) {
+      ElMessage({
+        type: "success",
+        message: res.data.message,
+      })
+      //跳转目标页
+      router.replace('/')
+      isLoading.value = false
+      //本地保存access token 和 refresh token
+      localStorage.setItem('access', res.data.accessToken);
+      localStorage.setItem('refresh',res.data.refreshToken)
+    } else {
+      ElMessage({
+        type: "warning",
+        message: res.data.message
+      })
+    }
+  }).catch((err) => {
+    console.log(err)
+  })
+}
+
+
 //is loading
 const isLoading = ref(false)
 
 //submit
-const submitLogin = () => {
+const submitLogin = async () => {
   try {
     if (form.username !== '' && form.password !== '') {
       isLoading.value = true
-      setTimeout(() => {
-        router.replace('/')
-        ElMessage({
-          type: "success",
-          message: '登陆成功'
-        })
-        isLoading.value = false
-      },3000)
+      await login(form.username, form.password)
     } else {
       ElMessage({
         type: "warning",
