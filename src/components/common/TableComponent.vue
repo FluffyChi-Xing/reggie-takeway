@@ -14,7 +14,6 @@ const props = defineProps({
   deleteRow: function () {},
   unSale: Boolean,
 })
-
 </script>
 
 <template>
@@ -38,9 +37,15 @@ const props = defineProps({
         <template v-if="item.type === true" #default="scope">
           <div class="w-full h-auto relative block p-4">
             <p class="w-full h-auto leading-[20px] whitespace-pre-line text-ellipsis overflow-hidden">
-              <img :src="scope.row.image" :alt="scope.row.name" class="w-[100px] h-[100px] cursor-pointer relative block object-contain" loading="lazy">
+              <img
+                  :src="scope.row.image"
+                  :alt="scope.row.name"
+                  class="w-[100px] h-[100px] cursor-pointer relative block object-contain"
+                  loading="lazy"
+                  onerror="this.src=`src/assets/image/login-l.png`"
+              >
             </p>
-            <p>{{ scope.row.info }}</p>
+            <p>{{ scope.row.description }}</p>
           </div>
         </template>
       </el-table-column>

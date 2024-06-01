@@ -1,7 +1,7 @@
 import { fileURLToPath, URL } from 'node:url'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
-import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import {AntDesignVueResolver, ElementPlusResolver} from 'unplugin-vue-components/resolvers'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import VueDevTools from 'vite-plugin-vue-devtools'
@@ -15,7 +15,12 @@ export default defineConfig({
       resolvers: [ElementPlusResolver()],
     }),
     Components({
-      resolvers: [ElementPlusResolver()],
+      resolvers: [
+          ElementPlusResolver(),
+          AntDesignVueResolver({
+            importStyle: false, // css in js
+        }),
+      ],
     }),
   ],
   resolve: {

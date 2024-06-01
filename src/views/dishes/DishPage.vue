@@ -5,8 +5,58 @@ import axios from "axios";
 import TopBanner from "@/components/common/TopBanner.vue";
 import TableComponent from "@/components/common/TableComponent.vue";
 import {ElMessage} from "element-plus";
-
+import { onMounted } from "vue";
 //拉取菜单数据
+//定义分页查询的基本数据
+const pageNo = ref(1)
+const pageSize = 5
+
+//页面总数量
+const totalCount = ref()
+
+//换页函数
+const changePage = (current) => {
+  pageNo.value = current
+  //清空data
+  table.data = []
+  //重新拉取
+  pullData()
+}
+
+
+
+const pullData = () => {
+  //提取accessToken
+  const access = localStorage.getItem('access').toString()
+  axios.get(`http://localhost:3000/dish/pull?pageNo=${pageNo.value}&pageSize=${pageSize}`, {
+    headers: {
+      Authorization: `Bearer ${access}`
+    }
+  }).then((res) => {
+    if (res.data.code === 200) {
+      ElMessage({
+        type: "success",
+        message: res.data.message,
+      })
+      res.data.data.forEach((item) => {
+        if (item.status === 1) {
+          item.status = '已上架'
+        } else {
+          item.status = '已下架'
+        }
+        table.data.push(item)
+      })
+      totalCount.value = (res.data.count / pageSize) * 10
+    } else {
+      ElMessage({
+        type: "warning",
+        message: res.data.message,
+      })
+    }
+  }).catch((err) => {
+    console.log(err)
+  })
+}
 
 //title
 const title = ref('菜品管理')
@@ -14,7 +64,7 @@ const title = ref('菜品管理')
 //value
 const value = ref()
 
-//table
+//table structure
 const table = reactive({
   labels: [
     {
@@ -24,10 +74,6 @@ const table = reactive({
     {
       label: '菜品名称',
       prop: 'name'
-    },
-    {
-      label: '菜品分类',
-      prop: 'flavor'
     },
     {
       label: '售卖状态',
@@ -40,68 +86,14 @@ const table = reactive({
     },
     {
       label: '最后修改时间',
-      prop: 'time'
+      prop: 'update_time'
     },
     {
       label: '售价',
       prop: 'price'
     }
   ],
-  data: [
-    {
-      id: 1,
-      name: '水煮肉片',
-      price: 79,
-      time: '2024-04-15',
-      status: '起售',
-      flavor: '川菜',
-      image: 'https://img95.699pic.com/photo/50171/9675.jpg_wh860.jpg',
-      info: 'ohqwufhwuhfwqhfuiwbfhbwvbwivbibwiuvbiqwbvuiwbvibwqivbwubvub'
-    },
-    {
-      id: 2,
-      name: '宫保鸡丁',
-      price: 35,
-      time: '2024-04-15',
-      status: '起售',
-      flavor: '川菜',
-      image: 'https://tse1-mm.cn.bing.net/th/id/OIP-C.Bj936iOmWVSxWOYXL8l5IQHaEK?rs=1&pid=ImgDetMain',
-      info: 'ohqwufhwuhfwqhfuiwbfhbwvbwivbibwiuvbiqwbvuiwbvibwqivbwubvub'
-    },
-    {
-      id: 3,
-      name: '金钱蛋',
-      price: 45,
-      time: '2024-04-15',
-      status: '停售',
-      flavor: '川菜',
-      image: 'https://tse1-mm.cn.bing.net/th/id/OIP-C.3eu6oMWw89b8TuJfEJV_PgHaE8?rs=1&pid=ImgDetMain',
-      info: 'ohqwufhwuhfwqhfuiwbfhbwvbwivbibwiuvbiqwbvuiwbvibwqivbwubvub'
-    },
-    {
-      id: 4,
-      name: '九转大肠',
-      price: 79,
-      time: '2024-04-15',
-      status: '起售',
-      flavor: '鲁菜',
-      image: 'https://ts1.cn.mm.bing.net/th/id/R-C.49ecf688950caf1f1' +
-          'c243cf4c816c0d1?rik=mtkZln0XLEFYKA&riu=http%3a%2f%2fpic.ntimg' +
-          '.cn%2ffile%2f20150318%2f19948422_093402464000_2.jpg&ehk=DSuuS9l' +
-          'sW2XV%2fBj0XeI5ZAYNKmreohuJibPd58lDWFg%3d&risl=&pid=ImgRaw&r=0',
-      info: 'ohqwufhwuhfwqhfuiwbfhbwvbwivbibwiuvbiqwbvuiwbvibwqivbwubvub'
-    },
-    {
-      id: 5,
-      name: '糖醋里脊',
-      price: 45,
-      time: '2024-04-15',
-      status: '起售',
-      flavor: '川菜',
-      image: 'https://tse4-mm.cn.bing.net/th/id/OIP-C.1gBW9nY2DyXqJJSN3YgdIQHaE1?rs=1&pid=ImgDetMain',
-      info: 'ohqwufhwuhfwqhfuiwbfhbwvbwivbibwiuvbiqwbvuiwbvibwqivbwubvub'
-    }
-  ],
+  data: [],
   highLight: true,
   isFixed: 'right',
   stripe: true,
@@ -138,7 +130,11 @@ const form = reactive({
   price: 0,
   flavor: '',
   image: [],
+  description: '',
   status: true,
+  code: 114514,
+  sort: 1,
+  category_id: 123,
 })
 
 //菜品图片上传业务逻辑
@@ -162,6 +158,7 @@ const getImage = (file,fileList) => {
 
 //使用oss上传图片
 const handleUpload = async () => {
+  const access = localStorage.getItem('access').toString()
   if (form.name !== '' && form.flavor !== '') {
     //上传图片到oss
     await axios.get('http://localhost:3000/oss/signature').then(async (res) => {
@@ -201,23 +198,21 @@ const handleUpload = async () => {
         price: form.price,
         sort: 1,
         code: Date.now(),
-        image: `${ossData.host} / ${ossData.dir} ${imageName.value}`,
-        description: '',
+        image: `${ossData.host}/${ossData.dir}${imageName.value}`,
+        description: form.description,
         category_id: 114514,
         status: 1,
       }, {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
-              'eyJ1c2VybmFtZSI6InhpYW9taW5nIiwicGFzc3dvcmQiOiIxMTQ1MTQi' +
-              'LCJpYXQiOjE3MTcxNTkwNzYsImV4cCI6MTcxNzE2MDg3Nn0.bU3EKKCYw' +
-              'zvkboGJbmDY7iotkWtZrJI_D2xsUQ-2Cnk'
+          Authorization: `Bearer ${access}`
         }
       }).then((res) => {
         ElMessage({
           type: "success",
           message: res.data.message
         })
+        isShow.value = false
       }).catch((err) => {
         ElMessage({
           type: "warning",
@@ -234,6 +229,45 @@ const handleUpload = async () => {
     })
   }
 }
+//根据菜名查询菜品
+const searchByName = () => {
+  if (value.value) {
+    //提取access
+    const access = localStorage.getItem('access').toString()
+    axios.get(`http://localhost:3000/dish/search?name=${value.value}`, {
+      headers: {
+        Authorization: `Bearer ${access}`,
+      },
+    }).then((res) => {
+      if (res.data.code === 200) {
+        ElMessage({
+          type: "success",
+          message: res.data.message,
+        })
+        //清空table data
+        table.data = []
+        table.data.push(res.data.data)
+      } else {
+        ElMessage({
+          type: "warning",
+          message: res.data.message,
+        })
+      }
+    })
+  } else {
+    ElMessage({
+      type: "warning",
+      message: '菜品名不可为空'
+    })
+  }
+}
+
+
+
+//om
+onMounted(() => {
+  pullData()
+})
 </script>
 
 <template>
@@ -253,7 +287,7 @@ const handleUpload = async () => {
             <!-- search banner -->
             <el-input v-model="value" placeholder="请输入菜品名称..." clearable prefix-icon="Dish" style="width: 240px"/>
             <!-- search button -->
-            <el-button type="primary" icon="Search" class="ml-4">搜索</el-button>
+            <el-button type="primary" icon="Search" class="ml-4" @click="searchByName">搜索</el-button>
             <!-- add dishes -->
             <div class="w-auto h-full relative block ml-auto">
               <el-button @click="isShow = true" type="primary" icon="Plus">添加菜品</el-button>
@@ -276,7 +310,7 @@ const handleUpload = async () => {
         </div>
         <!-- pagination -->
         <div class="w-full h-14 relative flex justify-center px-4">
-          <el-pagination layout="prev, pager, next" :total="50" class="w-auto h-auto my-auto" />
+          <el-pagination @current-change="changePage" layout="prev, pager, next" :total="totalCount" class="w-auto h-auto my-auto" />
         </div>
       </div>
     </div>
@@ -325,6 +359,9 @@ const handleUpload = async () => {
             >
               <el-button type="primary">上传图片</el-button>
             </el-upload>
+          </el-form-item>
+          <el-form-item label="描述">
+            <el-input v-model="form.description" clearable placeholder="请输入菜品描述" maxlength="120" show-word-limit />
           </el-form-item>
           <el-form-item>
             <el-button type="primary" class="w-full" icon="Plus" @click="handleUpload">添加</el-button>

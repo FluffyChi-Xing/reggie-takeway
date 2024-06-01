@@ -29,17 +29,18 @@ const login = async (username, password) => {
         type: "success",
         message: res.data.message,
       })
-      //跳转目标页
-      router.replace('/')
       isLoading.value = false
       //本地保存access token 和 refresh token
-      localStorage.setItem('access', res.data.accessToken);
-      localStorage.setItem('refresh',res.data.refreshToken)
+      localStorage.setItem('access', res.data.data.accessToken);
+      localStorage.setItem('refresh',res.data.data.refreshToken);
+      //跳转目标页
+      router.replace('/')
     } else {
       ElMessage({
         type: "warning",
         message: res.data.message
       })
+      isLoading.value = false
     }
   }).catch((err) => {
     console.log(err)
