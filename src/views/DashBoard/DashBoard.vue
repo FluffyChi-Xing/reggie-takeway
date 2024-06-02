@@ -12,6 +12,8 @@ const title = ref('仪表盘')
 
 //拉取今日菜品数据
 const todayDish = ref()
+//下架菜品数量
+const unSold = ref()
 const getDishNumber = () => {
   //提取access token
   const access = localStorage.getItem('access');
@@ -21,7 +23,8 @@ const getDishNumber = () => {
     },
   }).then((res) => {
     if (res.data.code === 200) {
-      todayDish.value = res.data.data
+      todayDish.value = res.data.data.sold
+      unSold.value = res.data.data.unBuying
     }
   }).catch((err) => {
     console.log(err)
@@ -110,7 +113,7 @@ onMounted(() => {
               <!-- 相较于昨天菜品数量变化量 -->
               <div class="w-full h-1/2 relative flex justify-center">
                 <a-statistic
-                    :value="2"
+                    :value="unSold"
                     title="相较于昨日"
                     suffix="种"
                     style="margin-right: auto"
