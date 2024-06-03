@@ -53,7 +53,7 @@ const props = defineProps({
       <el-table-column :fixed="props.isFixed" label="操作" width="200px">
         <el-button type="text" style="color: red" size="small" @click="props.deleteRow">删除</el-button>
         <el-button type="text" size="small" v-show="props.canEdit" @click="props.editRow">修改</el-button>
-        <el-button type="text" size="small" @click="props.frozenDish" v-show="props.unSale">下架</el-button>
+        <el-button type="text" size="small" @click="props.frozenDish" v-show="props.unSale">冻结</el-button>
       </el-table-column>
     </el-table>
   </div>

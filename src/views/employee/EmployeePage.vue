@@ -2,7 +2,10 @@
 import { ref } from "vue";
 import TopBanner from "@/components/common/TopBanner.vue";
 import { reactive } from "vue";
+import axios from "axios";
 import TableComponent from "@/components/common/TableComponent.vue";
+import { onMounted } from "vue";
+import {ElMessage} from "element-plus";
 
 //title
 const title = ref('职工管理')
@@ -10,12 +13,18 @@ const title = ref('职工管理')
 //value
 const value = ref()
 
+//pagination
+const pagination = ref()
+
+//分页拉取职工数据
+const pageSize = 5
+const pageNo = ref(1)
 //table
 const table = reactive({
   labels: [
     {
       label: '职工姓名',
-      prop: 'name',
+      prop: 'username',
     },
     {
       label: '职工手机号',
@@ -26,57 +35,194 @@ const table = reactive({
       prop: 'password',
     },
     {
-      label: '是否冻结',
-      prop: 'frozen',
+      label: '身份证ID',
+      prop: 'id_number',
     },
     {
-      label: 'id',
-      prop: 'id',
-    },
-  ],
-  data: [
-    {
-      id: 1,
-      name: '张三',
-      phone: '12133341211',
-      password: '114514',
-      frozen: '否'
+      label: '状态',
+      prop: 'status',
     },
     {
-      id: 2,
-      name: '李四',
-      phone: '12133341211',
-      password: '114514',
-      frozen: '否'
-    },
-    {
-      id: 3,
-      name: '王二麻子',
-      phone: '12133341211',
-      password: '114514',
-      frozen: '是'
-    },
-    {
-      id: 4,
-      name: '王五',
-      phone: '12133341211',
-      password: '114514',
-      frozen: '否'
-    },
-    {
-      id: 5,
-      name: '赵六',
-      phone: '12133341211',
-      password: '114514',
-      frozen: '否'
+      label: '性别',
+      prop: 'sex',
     }
   ],
+  data: [],
   highLight: true,
   select: false,
   canEdit: true,
   stripe: true,
   isFixed: 'right',
+  unSale: true,
 })
+
+//pull
+const pullData = () => {
+  //获取access
+  const access = localStorage.getItem('access').toString()
+  axios.get(`http://localhost:3000/employee/pull?pageNo=${pageNo.value}&pageSize=${pageSize}`, {
+    headers: {
+      Authorization: `Bearer ${access}`,
+    },
+  }).then((res) => {
+    const list = ref([])
+    if (res.data.code === 200) {
+      pagination.value = (res.data.data.count / pageSize) * 10;
+      res.data.data.result.forEach((item) => {
+        const result = reactive({
+          username: '',
+          password: '',
+          status: '',
+          id_number: '',
+          phone: '',
+          sex: '',
+        });
+        result.username = item.username;
+        result.password = item.password;
+        result.phone = item.phone;
+        result.id_number = item.id_number;
+        if (item.status === 1) {
+          result.status = '正常'
+        } else {
+          result.status = '冻结'
+        }
+        if (item.sex === '1') {
+          result.sex = '男'
+        } else {
+          result.sex = '女'
+        }
+        list.value.push(result)
+      })
+      table.data = list.value;
+      ElMessage({
+        type: "success",
+        message: res.data.message,
+      })
+    } else {
+      ElMessage({
+        type: "warning",
+        message: res.data.message,
+      })
+    }
+  }).catch((err) => {
+    console.log(err)
+  })
+}
+
+//current pageNo
+const currentNo = ref()
+const currentChange = (current) => {
+  currentNo.value = current
+}
+const changePage = (current) => {
+  pagination.value = current
+  //清空table.data
+  table.data = []
+  //重新拉取
+  pullData()
+}
+
+//根据用户名查询用户
+const searchOne = () => {
+  if (value.value) {
+    //获取access
+    const access = localStorage.getItem('access').toString()
+    axios.get(`http://localhost:3000/employee/search?name=${value.value}`, {
+      headers: {
+        Authorization: `Bearer ${access}`,
+      },
+    }).then((res) => {
+      if (res.data.code === 200) {
+        ElMessage({
+          type: "success",
+          message: res.data.message,
+        });
+        //清空table.data
+        table.data = []
+        //vo
+        const vo = reactive({
+          id: 0,
+          name: '',
+          username: '',
+          password: '',
+          phone: '',
+          sex: '',
+          id_number: '',
+          status: '',
+        })
+        const list = ref([])
+        res.data.data.forEach((item) => {
+          vo.id = item.id;
+          vo.name = item.name;
+          vo.username = item.username;
+          vo.password = item.password;
+          vo.phone = item.phone;
+          vo.id_number = item.id_number;
+          if (item.sex === '1') {
+            vo.sex = '男'
+          } else {
+            vo.sex = '女'
+          }
+          if (item.status === 1) {
+            vo.status = '正常'
+          } else {
+            vo.status = '冻结'
+          }
+         list.value.push(vo)
+          console.log(vo)
+        })
+        table.data = list.value
+      } else {
+        ElMessage({
+          type: "warning",
+          message: res.data.message,
+        });
+      }
+    })
+  } else {
+    ElMessage({
+      type: "warning",
+      message: '请先输入要查询的用户名',
+    })
+  }
+}
+
+//冻结用户权限
+const frozen = () => {
+  if (currentNo.value.username) {
+    //获取access
+    const access = localStorage.getItem('access').toString()
+    axios.get(`http://localhost:3000/employee/frozen?user=${currentNo.value.username}`, {
+      headers: {
+        Authorization: `Bearer ${access}`,
+      },
+    }).then((res) => {
+      if (res.data.code === 200) {
+        ElMessage({
+          type: "success",
+          message: res.data.message,
+        })
+        //清空table.data
+        table.data = []
+        //重新拉取
+        pullData()
+      } else {
+        ElMessage({
+          type: "warning",
+          message: res.data.message,
+        })
+      }
+    }).catch((err) => {
+      console.log(err)
+    })
+  } else {
+    ElMessage({
+      type: "warning",
+      message: '请先选择要冻结的用户',
+    })
+  }
+}
+
 
 //is show
 const isShow = ref(false)
@@ -88,6 +234,11 @@ const addForm = reactive({
   password: '',
   frozen: false,
   isRoot: ref(1)
+})
+
+//om
+onMounted(() => {
+  pullData()
 })
 </script>
 
@@ -108,8 +259,12 @@ const addForm = reactive({
             <!-- search input -->
             <el-input v-model="value" placeholder="请输入职工名..." clearable prefix-icon="User" style="width: 240px" />
             <!-- search button -->
-            <el-button type="primary" class="ml-4" icon="Search">
+            <el-button @click="searchOne" type="primary" class="ml-4" icon="Search">
               搜索
+            </el-button>
+            <!-- refresh data -->
+            <el-button type="primary" icon="Refresh" @click="pullData" class="ml-4">
+              刷新
             </el-button>
             <!-- add new employee button -->
             <div class="w-auto h-full relative block ml-auto">
@@ -132,11 +287,14 @@ const addForm = reactive({
               :stripe="table.stripe"
               :is-fixed="table.isFixed"
               :high-light="table.highLight"
+              :current-change="currentChange"
+              :un-sale="table.unSale"
+              :frozen-dish="frozen"
           />
         </div>
         <!-- pagination -->
         <div class="w-full h-14 relative flex justify-center">
-          <el-pagination layout="prev, pager, next" :total="50" class="w-auto h-auto my-auto" />
+          <el-pagination @current-change="changePage" layout="prev, pager, next" :total="pagination" class="w-auto h-auto my-auto" />
         </div>
       </div>
     </div>

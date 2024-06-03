@@ -410,6 +410,36 @@ const frozenDish = () => {
     })
   }
 }
+//删除菜品
+const deleteRow = () => {
+  //获取access
+  const access = localStorage.getItem('access').toString()
+  axios.get(`http://localhost:3000/dish/delete?name=${currentRow.value.name}`, {
+    headers: {
+      Authorization: `Bearer ${access}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      ElMessage({
+        type: "success",
+        message: res.data.message,
+      })
+      //清空table data
+      table.data = []
+      //重新拉取
+      pullData()
+    } else {
+      ElMessage({
+        type: "warning",
+        message: res.data.message,
+      })
+    }
+  }).catch((err) => {
+    console.log(err)
+  })
+}
+
+
 //dish update is show
 const updateShow = ref(false)
 
@@ -459,6 +489,7 @@ onMounted(() => {
               :current-change="currentChange"
               :frozen-dish="frozenDish"
               :edit-row="editRow"
+              :delete-row="deleteRow"
           />
         </div>
         <!-- pagination -->
