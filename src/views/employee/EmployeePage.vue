@@ -27,6 +27,10 @@ const table = reactive({
       prop: 'username',
     },
     {
+      label: '权限',
+      prop: 'name',
+    },
+    {
       label: '职工手机号',
       prop: 'phone',
     },
@@ -76,11 +80,13 @@ const pullData = () => {
           id_number: '',
           phone: '',
           sex: '',
+          name: '',
         });
         result.username = item.username;
         result.password = item.password;
         result.phone = item.phone;
         result.id_number = item.id_number;
+        result.name = item.name;
         if (item.status === 1) {
           result.status = '正常'
         } else {
@@ -115,7 +121,7 @@ const currentChange = (current) => {
   currentNo.value = current
 }
 const changePage = (current) => {
-  pagination.value = current
+  pageNo.value = current
   //清空table.data
   table.data = []
   //重新拉取
@@ -223,6 +229,86 @@ const frozen = () => {
   }
 }
 
+//修改职工信息
+const canShow = ref(false)
+//update row form
+const updateEmployee = reactive({
+  username: '',
+  name: '',
+  password: '',
+  id_number: '',
+  phone: '',
+  sex: 1,
+  status: '1',
+})
+//employee's name
+const names = ref([
+  {
+    label: '管理员',
+    value: '管理员',
+  },
+  {
+    label: '超级管理员',
+    value: '超级管理员',
+  }
+])
+const editShow = () => {
+ if (currentNo.value.username) {
+   canShow.value = true
+   updateEmployee.username = currentNo.value.username;
+  if (currentNo.value.status === '正常') {
+    updateEmployee.status = '1';
+  }
+  if (currentNo.value.status === '冻结') {
+    updateEmployee.status = '0';
+  }
+ } else {
+   ElMessage({
+     type: "warning",
+     message: '请先选择要修改的行',
+   })
+ }
+}
+//submit
+const updateSubmit = () => {
+  if (updateEmployee.username) {
+    //获取access
+    const access = localStorage.getItem('access').toString()
+    axios.post('http://localhost:3000/employee/update', {
+      username: updateEmployee.username,
+      password: updateEmployee.password,
+      phone: updateEmployee.phone,
+      sex: updateEmployee.sex.toString(),
+      name: updateEmployee.name,
+      id_number: updateEmployee.id_number,
+      status: Number(updateEmployee.status),
+    }, {
+      headers: {
+        Authorization: `Bearer ${access}`
+      },
+    }).then((res) => {
+      if (res.data.code === 200) {
+        ElMessage({
+          type: "success",
+          message: res.data.message,
+        })
+        //清空table.data
+        table.data = []
+        //重新拉取
+        pullData()
+        canShow.value = false
+      } else {
+        ElMessage({
+          type: "warning",
+          message: res.data.message,
+        })
+      }
+    }).catch((err) => {
+      console.log(err)
+    })
+  }
+}
+
 
 //is show
 const isShow = ref(false)
@@ -230,11 +316,62 @@ const isShow = ref(false)
 
 //add form
 const addForm = reactive({
+  username: '',
   name: '',
   password: '',
-  frozen: false,
-  isRoot: ref(1)
+  frozen: '1',
+  isRoot: 1,
+  id_number: '',
+  phone: '',
+  sex: 1,
 })
+
+//add submit
+const addSubmit = () => {
+  //获取access
+  const access = localStorage.getItem('access').toString()
+  if (addForm.isRoot === 1) {
+    addForm.name = '管理员'
+  } else {
+    addForm.name = '超级管理员'
+  }
+  axios.post('http://localhost:3000/employee/add', {
+    username: addForm.username,
+    name: addForm.name,
+    password: addForm.password,
+    sex: addForm.sex.toString(),
+    status: Number(addForm.frozen),
+    id_number: addForm.id_number,
+    phone: addForm.phone,
+  }, {
+    headers: {
+      Authorization: `Bearer ${access}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      ElMessage({
+        type: "success",
+        message: res.data.message,
+      })
+      //清空table.data
+      table.data = []
+      //重新拉取
+      pullData()
+      isShow.value = false
+    } else {
+      ElMessage({
+        type: "warning",
+        message: res.data.message,
+      })
+    }
+  }).catch((err) => {
+    console.log(err)
+    ElMessage({
+      type: "warning",
+      message: '参数不能为空',
+    })
+  })
+}
 
 //om
 onMounted(() => {
@@ -290,6 +427,7 @@ onMounted(() => {
               :current-change="currentChange"
               :un-sale="table.unSale"
               :frozen-dish="frozen"
+              :edit-row="editShow"
           />
         </div>
         <!-- pagination -->
@@ -311,30 +449,161 @@ onMounted(() => {
             label-width="auto"
         >
           <el-form-item label="职工姓名">
-            <el-input v-model="addForm.name" placeholder="请输入职工姓名" prefix-icon="User" clearable />
+            <el-input
+                v-model="addForm.username"
+                placeholder="请输入职工姓名"
+                prefix-icon="User"
+                clearable
+            />
           </el-form-item>
           <el-form-item label="密码">
-            <el-input type="password" v-model="addForm.password" placeholder="请输入密码" prefix-icon="Lock" clearable show-password />
+            <el-input
+                type="password"
+                v-model="addForm.password"
+                placeholder="请输入密码"
+                prefix-icon="Lock"
+                clearable
+                show-password
+            />
+          </el-form-item>
+          <el-form-item label="身份证号">
+            <el-input
+                v-model="addForm.id_number"
+                clearable
+                prefix-icon="More"
+                maxlength="18"
+                show-word-limit
+                placeholder="请输入身份证号"
+            />
+          </el-form-item>
+          <el-form-item label="手机号">
+            <el-input
+                v-model="addForm.phone"
+                clearable
+                placeholder="请输入手机号"
+                prefix-icon="Iphone"
+                maxlength="11"
+                show-word-limit
+            />
           </el-form-item>
           <el-form-item label="职工权限">
             <el-radio-group v-model="addForm.isRoot">
-              <el-radio :value="1">用户</el-radio>
-              <el-radio :value="2">管理员</el-radio>
+              <el-radio :value="1">管理员</el-radio>
+              <el-radio :value="2">超级管理员</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="性别">
+            <el-radio-group v-model="addForm.sex">
+              <el-radio :value="1">男</el-radio>
+              <el-radio :value="2">女</el-radio>
             </el-radio-group>
           </el-form-item>
           <el-form-item label="是否冻结">
             <el-switch
                 v-model="addForm.frozen"
+                active-value="1"
+                inactive-value="2"
                 style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
+                active-action-icon="Unlock"
+                inactive-action-icon="Lock"
             />
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" icon="Plus">确认添加</el-button>
           </el-form-item>
         </el-form>
       </div>
       <template #footer>
+        <el-button @click="addSubmit" type="primary" icon="Plus">
+          确认添加
+        </el-button>
         <el-button @click="isShow = false" type="info" icon="CircleClose">
+          取消
+        </el-button>
+      </template>
+    </el-dialog>
+    <!-- edit employee el-dialog -->
+    <el-dialog
+        title="更改职工信息"
+        width="500px"
+        v-model="canShow"
+        draggable
+    >
+      <div class="w-full h-auto relative block">
+        <el-form
+            label-width="auto"
+            v-model="updateEmployee"
+        >
+          <el-form-item label="用户名">
+            <el-input v-model="updateEmployee.username" prefix-icon="User" disabled />
+          </el-form-item>
+          <el-form-item label="权限">
+            <el-select
+                placeholder="请选择用户权限"
+                v-model="updateEmployee.name"
+            >
+              <el-option
+                  v-for="item in names"
+                  :key="item"
+                  :label="item.label"
+                  :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="密码">
+            <el-input
+                v-model="updateEmployee.password"
+                type="password"
+                clearable
+                placeholder="请输入密码"
+                show-password
+                prefix-icon="Lock"
+            />
+          </el-form-item>
+          <el-form-item label="身份证号">
+            <el-input
+                v-model="updateEmployee.id_number"
+                placeholder="请输入身份证号"
+                clearable
+                maxlength="18"
+                show-word-limit
+                prefix-icon="Files"
+            />
+          </el-form-item>
+          <el-form-item label="电话号">
+            <el-input
+                v-model="updateEmployee.phone"
+                placeholder="请输入电话号"
+                clearable
+                maxlength="11"
+                show-word-limit
+                prefix-icon="Iphone"
+            />
+          </el-form-item>
+          <el-form-item label="性别">
+            <el-radio-group v-model="updateEmployee.sex">
+              <el-radio :value="1">
+                男
+              </el-radio>
+              <el-radio :value="2">
+                女
+              </el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="状态">
+            <el-switch
+                v-model="updateEmployee.status"
+                active-value="1"
+                inactive-value="0"
+                active-action-icon="Unlock"
+                inactive-action-icon="Lock"
+                style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
+            />
+          </el-form-item>
+        </el-form>
+      </div>
+      <template #footer>
+        <el-button @click="updateSubmit" type="primary" icon="Upload">
+          确认修改
+        </el-button>
+        <el-button @click="canShow = false" type="primary" icon="CircleClose">
           取消
         </el-button>
       </template>
