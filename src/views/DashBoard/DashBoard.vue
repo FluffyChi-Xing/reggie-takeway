@@ -6,6 +6,8 @@ import TopBanner from "@/components/common/TopBanner.vue";
 import { onMounted } from "vue";
 import router from "@/router/index.js";
 import {ElMessage} from "element-plus";
+//今日营业额
+const amount = ref()
 
 //title
 const title = ref('仪表盘')
@@ -59,9 +61,31 @@ const jumpTo = (item) => {
   })
 }
 
+//获取营业额
+const getAmount = () => {
+  //获取access
+  const access = localStorage.getItem('access').toString()
+  axios.get('http://localhost:3000/employee/amount?employee_id=1', {
+    headers: {
+      Authorization: `Bearer ${access}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      localStorage.setItem('today_amount', res.data.data.amount);
+    }
+  }).catch((err) => {
+    console.log(err)
+  })
+}
+const initAmount = () => {
+  amount.value = Number(localStorage.getItem('today_amount').toString())
+}
+
 //om
 onMounted(() => {
   getDishNumber()
+  getAmount()
+  initAmount()
 })
 </script>
 
@@ -179,7 +203,7 @@ onMounted(() => {
               <div class="w-full h-1/2 relative flex justify-start">
                 <a-statistic
                     title="今日营业额"
-                    :value="6579.5"
+                    :value="amount"
                     suffix="¥"
                 />
               </div>

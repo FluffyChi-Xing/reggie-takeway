@@ -95,6 +95,8 @@ const table = reactive({
   stripe: true,
   isFixed: 'right',
 })
+
+//拉取数据
 </script>
 
 <template>
