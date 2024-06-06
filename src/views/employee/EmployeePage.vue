@@ -400,7 +400,11 @@ onMounted(() => {
               搜索
             </el-button>
             <!-- refresh data -->
-            <el-button type="primary" icon="Refresh" @click="pullData" class="ml-4">
+            <el-button
+                style="background-color: #1f1800;border: none"
+                type="primary" icon="Refresh"
+                @click="pullData"
+                class="ml-4">
               刷新
             </el-button>
             <!-- add new employee button -->

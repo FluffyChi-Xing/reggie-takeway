@@ -13,7 +13,12 @@ const props = defineProps({
   editRow: function () {},
   deleteRow: function () {},
   frozenDish: function () {},
+  finish: function () {},
+  wantCancel: function () {},
   unSale: Boolean,
+  needDel: Boolean,
+  isFinish: Boolean,
+  cancel: Boolean,
 })
 </script>
 
@@ -51,9 +56,11 @@ const props = defineProps({
         </template>
       </el-table-column>
       <el-table-column :fixed="props.isFixed" label="操作" width="200px">
-        <el-button type="text" style="color: red" size="small" @click="props.deleteRow">删除</el-button>
+        <el-button type="text" style="color: red" size="small" v-if="!needDel" @click="props.deleteRow">删除</el-button>
         <el-button type="text" size="small" v-show="props.canEdit" @click="props.editRow">修改</el-button>
         <el-button type="text" size="small" @click="props.frozenDish" v-show="props.unSale">冻结</el-button>
+        <el-button type="text" size="small" @click="props.finish" v-if="isFinish">销单</el-button>
+        <el-button type="text" style="color: red" size="small" @click="props.wantCancel" v-if="cancel">取消</el-button>
       </el-table-column>
     </el-table>
   </div>
