@@ -40,7 +40,7 @@ const checkPath = (path) => {
 const jumpTo = (path) => {
   router.push(path)
   ElMessage({
-    type: "success",
+    type: "info",
     message: checkPath(path),
   })
 }

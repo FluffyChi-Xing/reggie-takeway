@@ -5,12 +5,11 @@ import SideMenu from "@/components/layout/SideMenu.vue";
 import { useCounterStore } from "@/stores/counter.js";
 import {onMounted} from "vue";
 import {watch} from "vue";
+import {checkOrder} from "@/utils/check-order.js";
 
 //store
 const store = useCounterStore()
 
-//route
-const route = useRoute()
 
 //default width
 const width = ref('200px')
@@ -34,6 +33,9 @@ watch(() => store.collapse, () => {
 //om
 onMounted(() => {
   changeWidth()
+  setInterval(() => {
+    checkOrder()
+  }, 3000)
 })
 </script>
 

@@ -6,6 +6,8 @@ import { onMounted } from "vue";
 import TableComponent from "@/components/common/TableComponent.vue";
 import axios from "axios";
 import {ElMessage} from "element-plus";
+import {ossUploadService} from "@/utils/oss-upload.service.js";
+import {Unlock} from "@element-plus/icons-vue";
 
 //title
 const title = ref('套餐管理')
@@ -70,6 +72,11 @@ const pullData = () => {
   }).then((res) => {
     if (res.data.code === 200) {
       res.data.data.forEach((item) => {
+        if (item.status === 1) {
+          item.status = '已上架'
+        } else {
+          item.status = '未上架'
+        }
         table.data.push(item)
       })
       pagination.value = (res.data.count / pageSize) * 10;
@@ -89,24 +96,31 @@ const pullData = () => {
 }
 
 //selection
-const selection = ref([
-  {
-    label: '儿童套餐',
-    value: '儿童套餐'
-  },
-  {
-    label: '成人餐',
-    value: '成人餐'
-  }
-])
+const selection = ref()
+const getCate = () => {
+  //获取access
+  const access = localStorage.getItem('access').toString()
+  axios.get('http://localhost:3000/category/findAll', {
+    headers: {
+      Authorization: `Bearer ${access}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      selection.value = res.data.data;
+    }
+  }).catch((err) => {
+    console.log(err);
+  })
+}
 
 //edit form
 const editForm = reactive({
   name: '',
   price: 0,
   category: '',
-  isSale: true,
-  image: ''
+  status: '1',
+  image: [],
+  description: '',
 })
 
 //isShow
@@ -123,7 +137,7 @@ const searchOne = () => {
   if (value.value) {
     //获取access
     const access = localStorage.getItem('access').toString();
-    axios.get('http://localhost:3000/set-meal/search?id=1', {
+    axios.get(`http://localhost:3000/set-meal/search?id=${value.value}`, {
       headers: {
         Authorization: `Bearer ${access}`,
       },
@@ -153,10 +167,70 @@ const searchOne = () => {
     })
   }
 }
+//新建set meal
+const fileRef = ref()
+const getImage = (file,fileList) => {
+  editForm.image = fileList
+}
+const imageName = ref()
+//获取上传签名
+
+//生成文件名作为key
+const generateFileName = (ossData, file) => {
+  const suffix = file.name.slice(file.name.lastIndexOf('.'));
+  const filename = editForm.name + '-' + editForm.price + '-' + editForm.category + '-' + Date.now() + suffix;
+  imageName.value = filename
+  const dir = ossData.dir
+  return dir + filename;
+}
+//新增set meal function
+const createMeal = async (ossData) => {
+  //获取access
+  const access = localStorage.getItem('access').toString()
+  await axios.post('http://localhost:3000/set-meal/create', {
+    status: editForm.status,
+    name: editForm.name,
+    category_id: editForm.category,
+    description: editForm.description,
+    price: editForm.price,
+    image: `${ossData.host}/${ossData.dir}${imageName.value}`,
+    create_user: 1,
+    update_user: 1,
+  }, {
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: `Bearer ${access}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      ElMessage({
+        type: "success",
+        message: res.data.message,
+      })
+      //clear
+      table.data = []
+      //pull
+      pullData()
+    } else {
+      ElMessage({
+        type: "warning",
+        message: res.data.message,
+      })
+    }
+  }).catch((err) => {
+    console.log(err)
+  })
+}
+//submit
+const handelSubmit = async () => {
+  await ossUploadService(editForm, createMeal, generateFileName);
+  isShow.value = false
+}
 
 //om
 onMounted(() => {
   pullData()
+  getCate()
 })
 </script>
 
@@ -221,6 +295,7 @@ onMounted(() => {
         title="添加套餐"
         width="500px"
         v-model="isShow"
+        draggable
     >
       <div class="w-full h-auto relative block">
         <el-form
@@ -233,19 +308,35 @@ onMounted(() => {
           <el-form-item label="套餐价格">
             <el-input v-model="editForm.price" placeholder="请输入售价" prefix-icon="Ticket" clearable />
           </el-form-item>
+          <el-form-item label="简介">
+            <el-input
+                v-model="editForm.description"
+                placeholder="请输入简介"
+                prefix-icon="Document"
+                clearable
+                maxlength="120"
+                show-word-limit
+            />
+          </el-form-item>
           <el-form-item label="套餐分类">
             <el-select
                 v-model="editForm.category"
                 placeholder="请选择套餐分类"
             >
-              <el-option v-for="item in selection" :key="item" :label="item.label" :value="item.value" />
+              <el-option v-for="item in selection" :key="item" :label="item.name" :value="item.id" />
             </el-select>
           </el-form-item>
           <el-form-item label="套餐图片">
             <el-upload
-                v-model="editForm.image"
+                ref="fileRef"
+                action="#"
+                :auto-upload="false"
                 :multiple="false"
+                limit="1"
                 show-file-list
+                :on-change="getImage"
+                accept=".jpg,.png"
+                :file-list="editForm.image"
             >
               <el-button type="primary" icon="Upload">上传图片</el-button>
             </el-upload>
@@ -253,16 +344,18 @@ onMounted(() => {
           <el-form-item label="是否起售">
             <el-switch
                 size="default"
-                v-model="editForm.isSale"
+                v-model="editForm.status"
+                :active-value="1"
+                :inactive-value="0"
+                :active-action-icon="Unlock"
+                :inactive-action-icon="Lock"
                 style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
             />
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" icon="Plus">确认添加</el-button>
           </el-form-item>
         </el-form>
       </div>
       <template #footer>
+        <el-button @click="handelSubmit" type="primary" icon="Plus">确认添加</el-button>
         <el-button type="info" icon="CircleClose" @click="isShow = false">取消</el-button>
       </template>
     </el-dialog>

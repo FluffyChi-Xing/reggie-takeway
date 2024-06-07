@@ -6,6 +6,7 @@ import TopBanner from "@/components/common/TopBanner.vue";
 import TableComponent from "@/components/common/TableComponent.vue";
 import {ElMessage} from "element-plus";
 import { onMounted } from "vue";
+import {ossUploadService} from "@/utils/oss-upload.service.js";
 //拉取菜单数据
 //定义分页查询的基本数据
 const pageNo = ref(1)
@@ -216,8 +217,10 @@ const currentRow = ref()
 const currentChange = (current) => {
   currentRow.value = current
 }
-const dataOss = ref()
 
+
+/*
+const dataOss = ref()
 //将图片上传到oss 的复用函数
 const ossImage = async (item) => {
   await axios.get('http://localhost:3000/oss/signature').then(async (res) => {
@@ -262,9 +265,11 @@ const ossImage = async (item) => {
     console.log(err)
   })
 }
+ */
+
 //确认修改
 const handleUpdate = async () => {
-  await ossImage(updateForm);
+  await ossUploadService(updateForm, updateDish, generateFileName);
   updateShow.value = false
 }
 //编辑row
@@ -470,7 +475,14 @@ onMounted(() => {
             <el-button type="primary" icon="Search" class="ml-4" @click="searchByName">搜索</el-button>
             <!-- add dishes -->
             <div class="w-auto h-full relative block ml-auto">
-              <el-button @click="isShow = true" type="primary" icon="Plus">添加菜品</el-button>
+              <el-button
+                  @click="isShow = true"
+                  type="primary"
+                  icon="Plus"
+                  style="background-color: #1f1800;border: none"
+              >
+                添加菜品
+              </el-button>
             </div>
           </div>
         </el-card>
