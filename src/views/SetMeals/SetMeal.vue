@@ -2,7 +2,10 @@
 import { ref } from "vue";
 import TopBanner from "@/components/common/TopBanner.vue";
 import { reactive } from "vue";
+import { onMounted } from "vue";
 import TableComponent from "@/components/common/TableComponent.vue";
+import axios from "axios";
+import {ElMessage} from "element-plus";
 
 //title
 const title = ref('套餐管理')
@@ -35,57 +38,15 @@ const table = reactive({
       prop: 'status'
     },
     {
+      label: '创建者',
+      prop: 'create',
+    },
+    {
       label: '最后修改时间',
-      prop: 'time'
+      prop: 'update_time'
     }
   ],
-  data: [
-    {
-      id: 1,
-      name: '儿童套餐一',
-      image: 'https://picsum.photos/200/300?1',
-      price: 120,
-      status: '销售中',
-      category: '儿童餐',
-      time: '2023-02-13'
-    },
-    {
-      id: 2,
-      name: '儿童套餐二',
-      image: 'https://picsum.photos/200/300?2',
-      price: 120,
-      status: '销售中',
-      category: '儿童餐',
-      time: '2023-02-13'
-    },
-    {
-      id: 3,
-      name: '儿童套餐三',
-      image: 'https://picsum.photos/200/300?3',
-      price: 120,
-      status: '销售中',
-      category: '儿童餐',
-      time: '2023-02-13'
-    },
-    {
-      id: 4,
-      name: '儿童套餐四',
-      image: 'https://picsum.photos/200/300?4',
-      price: 120,
-      status: '销售中',
-      category: '儿童餐',
-      time: '2023-02-13'
-    },
-    {
-      id: 5,
-      name: '儿童套餐五',
-      image: 'https://picsum.photos/200/300?5',
-      price: 120,
-      status: '销售中',
-      category: '儿童餐',
-      time: '2023-02-13'
-    }
-  ],
+  data: [],
   highLight: true,
   select: false,
   isFixed: 'right',
@@ -93,6 +54,39 @@ const table = reactive({
   canEdit: true,
   unSale: true,
 })
+
+//pull data
+const pageNo = ref(1);
+const pageSize = 5;
+const pagination = ref()
+const pullData = () => {
+  //获取access
+  const access = localStorage.getItem('access').toString()
+  //axios
+  axios.get(`http://localhost:3000/set-meal/pull?pageNo=${pageNo.value}&pageSize=${pageSize}`, {
+    headers: {
+      Authorization: `Bearer ${access}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      res.data.data.forEach((item) => {
+        table.data.push(item)
+      })
+      pagination.value = (res.data.count / pageSize) * 10;
+      ElMessage({
+        type: "success",
+        message: res.data.message,
+      })
+    } else {
+      ElMessage({
+        type: "warning",
+        message: res.data.message,
+      })
+    }
+  }).catch((err) => {
+    console.log(err)
+  })
+}
 
 //selection
 const selection = ref([
@@ -117,6 +111,53 @@ const editForm = reactive({
 
 //isShow
 const isShow = ref(false)
+//refresh
+const refresh = () => {
+  //clear
+  table.data = []
+  //pull
+  pullData()
+}
+//search set-meal
+const searchOne = () => {
+  if (value.value) {
+    //获取access
+    const access = localStorage.getItem('access').toString();
+    axios.get('http://localhost:3000/set-meal/search?id=1', {
+      headers: {
+        Authorization: `Bearer ${access}`,
+      },
+    }).then((res) => {
+      if (res.data.code === 200) {
+        //clear
+        table.data = []
+        //pull
+        table.data = res.data.data
+        ElMessage({
+          type: "success",
+          message: '查询成功',
+        })
+      } else {
+        ElMessage({
+          type: "warning",
+          message: res.data.message,
+        })
+      }
+    }).catch((err) => {
+      console.log(err);
+    })
+  } else {
+    ElMessage({
+      type: "warning",
+      message: '查询不可为空',
+    })
+  }
+}
+
+//om
+onMounted(() => {
+  pullData()
+})
 </script>
 
 <template>
@@ -137,10 +178,19 @@ const isShow = ref(false)
             <!-- search input -->
             <el-input v-model="value" style="width: 240px" clearable prefix-icon="Box" placeholder="请输入套餐名..." />
             <!-- search submit button -->
-            <el-button icon="Search" type="primary" class="ml-4">搜索</el-button>
+            <el-button @click="searchOne" icon="Search" type="primary" class="ml-4">搜索</el-button>
+            <!-- refresh -->
+            <el-button @click="refresh" icon="Refresh" type="primary" class="ml-4">刷新</el-button>
             <!-- add set meal button -->
             <div class="w-auto h-full relative block ml-auto">
-              <el-button @click="isShow = true" type="primary" icon="Plus">添加套餐</el-button>
+              <el-button
+                  @click="isShow = true"
+                  type="primary"
+                  icon="Plus"
+                  style="background-color: #1f1800;border: none"
+              >
+                添加套餐
+              </el-button>
             </div>
           </div>
         </el-card>
@@ -162,7 +212,7 @@ const isShow = ref(false)
         </div>
         <!-- pagination -->
         <div class="w-full h-14 relative flex justify-center">
-          <el-pagination layout="prev, pager, next" :total="50" class="w-auto h-auto my-auto" />
+          <el-pagination layout="prev, pager, next" :total="pagination" class="w-auto h-auto my-auto" />
         </div>
       </div>
     </div>

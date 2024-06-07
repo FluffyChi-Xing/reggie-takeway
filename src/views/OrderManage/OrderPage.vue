@@ -244,7 +244,8 @@ onMounted(() => {
             <el-button @click="searchOrder" type="primary" class="ml-4" icon="Plus">搜索</el-button>
             <!-- refresh -->
             <el-button
-                style="background-color: #1f1800;border: none" type="primary"
+                style="background-color: #1f1800;border: none"
+                type="primary"
                 icon="Refresh"
                 class="ml-4"
                 @click="refresh"
