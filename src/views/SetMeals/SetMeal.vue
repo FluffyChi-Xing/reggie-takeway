@@ -54,7 +54,7 @@ const table = reactive({
   isFixed: 'right',
   stripe: true,
   canEdit: true,
-  unSale: true,
+  unSale: false,
 })
 
 //pull data
@@ -226,6 +226,67 @@ const handelSubmit = async () => {
   await ossUploadService(editForm, createMeal, generateFileName);
   isShow.value = false
 }
+//current change
+//delete set meal
+const mealName = ref()
+const changeCurrent = (current) => {
+  mealName.value = current
+}
+//delete row
+const deleteRow = () => {
+  if (mealName.value.name) {
+    //get access
+    const access = localStorage.getItem('access').toString()
+    axios.get(`http://localhost:3000/set-meal/delete?name=${mealName.value.name}`, {
+      headers: {
+        Authorization: `Bearer ${access}`
+      },
+    }).then((res) =>{
+      if (res.data.code === 200) {
+        //clear table.data
+        table.data = []
+        //pull
+        pullData()
+        //message
+        ElMessage({
+          type: "success",
+          message: res.data.message,
+        })
+      } else {
+        ElMessage({
+          type: "warning",
+          message: res.data.message,
+        })
+      }
+    }).catch((err) => {
+      console.log(err)
+    })
+  } else {
+    ElMessage({
+      type: "warning",
+      message: '请选择要删除的行',
+    })
+  }
+}
+//edit row ref
+const editShow = ref(false)
+//edit row
+const editRow = () => {
+  editShow.value = true
+}
+//edit row
+const formEdit = reactive({
+  name: '',
+  image: [],
+  status: '1',
+  flavor: '',
+  price: 0,
+  description: '',
+})
+const changeRow = ref()
+const changeImage = (file, fileList) =>{
+  formEdit.image = fileList
+}
 
 //om
 onMounted(() => {
@@ -282,6 +343,9 @@ onMounted(() => {
               :stripe="table.stripe"
               :can-edit="table.canEdit"
               :un-sale="table.unSale"
+              :current-change="changeCurrent"
+              :delete-row="deleteRow"
+              :edit-row="editRow"
           />
         </div>
         <!-- pagination -->
@@ -334,9 +398,9 @@ onMounted(() => {
                 :multiple="false"
                 limit="1"
                 show-file-list
-                :on-change="getImage"
                 accept=".jpg,.png"
                 :file-list="editForm.image"
+                :on-change="getImage"
             >
               <el-button type="primary" icon="Upload">上传图片</el-button>
             </el-upload>
@@ -357,6 +421,79 @@ onMounted(() => {
       <template #footer>
         <el-button @click="handelSubmit" type="primary" icon="Plus">确认添加</el-button>
         <el-button type="info" icon="CircleClose" @click="isShow = false">取消</el-button>
+      </template>
+    </el-dialog>
+    <!-- el-dialog 修改套餐 -->
+    <el-dialog
+        title="修改套餐"
+        v-model="editShow"
+        draggable
+        width="500px"
+    >
+      <div class="w-full h-auto relative block">
+        <el-form
+            label-width="auto"
+            v-model="formEdit"
+        >
+          <el-form-item label="套餐名">
+            <el-input v-model="formEdit.name" disabled prefix-icon="User" />
+          </el-form-item>
+          <el-form-item label="价格">
+            <el-input v-model="formEdit.price" clearable placeholder="请输入价格" prefix-icon="Ticket"  />
+          </el-form-item>
+          <el-form-item label="简介">
+            <el-input
+                v-model="formEdit.description"
+                placeholder="请输入简介"
+                clearable
+                prefix-icon="Document"
+                maxlength="120"
+                show-word-limit
+            />
+          </el-form-item>
+          <el-form-item label="分类">
+            <el-select
+                v-model="formEdit.flavor"
+                placeholder="请选择套餐分类"
+            >
+              <el-option
+                  v-for="item in selection"
+                  :key="item"
+                  :label="item.name"
+                  :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="上传图片">
+            <el-upload
+                ref="changeRow"
+                action="#"
+                :auto-upload="false"
+                :multiple="false"
+                limit="1"
+                show-file-list
+                accept=".jpg,.png"
+                :file-list="formEdit.image"
+                :on-change="changeImage"
+            >
+              <el-button type="primary" icon="Upload">上传图片</el-button>
+            </el-upload>
+          </el-form-item>
+          <el-form-item label="状态">
+            <el-switch
+                v-model="formEdit.status"
+                :active-action-icon="Unlock"
+                :inactive-action-icon="Lock"
+                :active-value="1"
+                :inactive-value="0"
+                style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
+            />
+          </el-form-item>
+        </el-form>
+      </div>
+      <template #footer>
+        <el-button type="primary" icon="Upload">确认</el-button>
+        <el-button type="primary" icon="CircleClose" @click="editShow = false">取消</el-button>
       </template>
     </el-dialog>
   </div>
