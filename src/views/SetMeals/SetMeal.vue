@@ -229,9 +229,6 @@ const handelSubmit = async () => {
 //current change
 //delete set meal
 const mealName = ref()
-const changeCurrent = (current) => {
-  mealName.value = current
-}
 //delete row
 const deleteRow = () => {
   if (mealName.value.name) {
@@ -271,10 +268,6 @@ const deleteRow = () => {
 //edit row ref
 const editShow = ref(false)
 //edit row
-const editRow = () => {
-  editShow.value = true
-}
-//edit row
 const formEdit = reactive({
   name: '',
   image: [],
@@ -284,8 +277,67 @@ const formEdit = reactive({
   description: '',
 })
 const changeRow = ref()
+//edit row
+const editRow = () => {
+  editShow.value = true
+}
+const changeCurrent = (current) => {
+  mealName.value = current
+  formEdit.name = mealName.value.name
+  formEdit.price = mealName.value.price
+  formEdit.description = mealName.value.description
+  if (mealName.value.status === '已上架') {
+    formEdit.status = '1'
+  } else {
+    formEdit.status = '0'
+  }
+}
 const changeImage = (file, fileList) =>{
   formEdit.image = fileList
+}
+//submit update
+const submitChange = async (ossData) => {
+  if (formEdit.name) {
+    //access
+    const access = localStorage.getItem('access').toString();
+    await axios.post('http://localhost:3000/set-meal/update', {
+      name: formEdit.name,
+      price: formEdit.price,
+      category_id: formEdit.flavor,
+      description: formEdit.description,
+      status: Number(formEdit.status),
+      image: `${ossData.host}/${ossData.dir}${imageName.value}`,
+    }, {
+      headers: {
+        Authorization: `Bearer ${access}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    }).then((res) => {
+      if (res.data.code === 200) {
+        //clear table.data
+        table.data = []
+        //pull
+        pullData()
+        //message
+        ElMessage({
+          type: "success",
+          message: res.data.message,
+        })
+      } else {
+        ElMessage({
+          type: "warning",
+          message: res.data.message,
+        })
+      }
+    }).catch((err) => {
+      console.log(err)
+    })
+  }
+}
+//handle update
+const handleUpdate = async () => {
+  await ossUploadService( formEdit, submitChange, generateFileName);
+  editShow.value = false
 }
 
 //om
@@ -492,7 +544,7 @@ onMounted(() => {
         </el-form>
       </div>
       <template #footer>
-        <el-button type="primary" icon="Upload">确认</el-button>
+        <el-button type="primary" icon="Upload" @click="handleUpdate">确认</el-button>
         <el-button type="primary" icon="CircleClose" @click="editShow = false">取消</el-button>
       </template>
     </el-dialog>

@@ -48,7 +48,7 @@ const props = defineProps({
                   :alt="scope.row.name"
                   class="w-[100px] h-[100px] cursor-pointer relative block object-contain"
                   loading="lazy"
-                  onerror="this.src=`src/assets/image/login-l.png`"
+                  onerror="this.src=`src/assets/image/oops.jpg`"
               >
             </p>
             <p>{{ scope.row.description }}</p>
