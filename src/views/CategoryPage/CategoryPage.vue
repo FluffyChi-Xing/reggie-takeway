@@ -39,7 +39,7 @@ const table = reactive({
     }
   ],
   data: [],
-  canEdit: true,
+  canEdit: false,
   highLight: true,
   select: false,
   stripe: true,
@@ -126,8 +126,100 @@ const refresh = () => {
 //add dish category
 const cateShow = ref(false)
 const addForm = reactive({
-
+  name: '',
+  sort: '1',
+  type: 0,
 })
+//category sort
+const cateSort = [
+  {
+    label: '1',
+    value: '1',
+  },
+  {
+    label: '2',
+    value: '2'
+  }
+]
+//handle submit
+const handleSubmit = () => {
+  //access
+  const access = localStorage.getItem('access').toString();
+  axios.post('http://localhost:3000/category/create', {
+    name: addForm.name,
+    type: Number(addForm.type),
+    sort: Number(addForm.sort),
+  }, {
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: `Bearer ${access}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      //clear
+      table.data = []
+      //pull
+      pullData()
+      //close
+      cateShow.value = false
+      //message
+      ElMessage({
+        type: "success",
+        message: res.data.message,
+      })
+    } else {
+      ElMessage({
+        type: "warning",
+        message: res.data.message,
+      })
+    }
+  }).catch((err) => {
+    console.log(err)
+  })
+}
+//current page
+const currentPage = ref()
+const selectRow = (current) => {
+  currentPage.value = current
+}
+//delete row
+const deleteRow = () => {
+  if (currentPage.value.id) {
+    //access
+    const access = localStorage.getItem('access').toString();
+    axios.get(`http://localhost:3000/category/delete?id=${currentPage.value.id}`, {
+      headers: {
+        Authorization: `Bearer ${access}`,
+      },
+    }).then((res) => {
+      if (res.data.code === 200) {
+        //clear
+        table.data = []
+        //pull
+        pullData()
+        //message
+        ElMessage({
+          type: "success",
+          message: res.data.message,
+        })
+      } else {
+        ElMessage({
+          type: "warning",
+          message: res.data.message,
+        })
+      }
+    }).catch((err) => {
+      console.log(err)
+    })
+  } else {
+    ElMessage({
+      type: "warning",
+      message: '请选择要删除的行',
+    })
+  }
+}
+
+
 
 //om
 onMounted(() => {
@@ -162,7 +254,7 @@ onMounted(() => {
             <el-button type="primary" class="ml-4" icon="Refresh" @click="refresh">刷新</el-button>
             <div class="w-auto h-full relative flex justify-between ml-auto">
               <!-- add dish cate -->
-              <el-button style="background-color: #1f1800;border: none" type="primary" icon="Plus">
+              <el-button @click="cateShow = true" style="background-color: #1f1800;border: none" type="primary" icon="Plus">
                 添加菜品分类
               </el-button>
             </div>
@@ -181,6 +273,8 @@ onMounted(() => {
               :high-light="table.highLight"
               :stripe="table.stripe"
               :is-fixed="table.isFixed"
+              :current-change="selectRow"
+              :delete-row="deleteRow"
           />
         </div>
         <!-- table pagination -->
@@ -197,10 +291,33 @@ onMounted(() => {
         v-model="cateShow"
     >
       <div class="w-full h-auto relative block">
-
+        <el-form
+            v-model="addForm"
+            label-width="auto"
+        >
+          <el-form-item label="风味名">
+            <el-input v-model="addForm.name" clearable placeholder="请输入风味名..." prefix-icon="KnifeFork" />
+          </el-form-item>
+          <el-form-item label="风味类型">
+            <el-select
+                placeholder="请选择类型..."
+                v-model="addForm.type"
+            >
+              <el-option v-for="item in cateSort" :key="item" :label="item.label" :value="item.value" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="风味排序">
+            <el-select
+                placeholder="请选择排序..."
+                v-model="addForm.sort"
+            >
+              <el-option v-for="item in cateSort" :key="item" :label="item.label" :value="item.value" />
+            </el-select>
+          </el-form-item>
+        </el-form>
       </div>
       <template #footer>
-        <el-button type="primary" icon="Upload">确认</el-button>
+        <el-button type="primary" icon="Upload" @click="handleSubmit">确认</el-button>
         <el-button type="primary" icon="CircleClose" @click="cateShow = false">取消</el-button>
       </template>
     </el-dialog>

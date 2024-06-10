@@ -25,7 +25,7 @@ const changePage = (current) => {
 }
 
 
-
+//pull table data
 const pullData = () => {
   //提取accessToken
   const access = localStorage.getItem('access').toString()
@@ -279,6 +279,39 @@ const editRow = () => {
 }
 
 
+//create dish
+const createDish = async (ossData) => {
+  //access
+  const access = localStorage.getItem('access').toString();
+  await axios.post('http://localhost:3000/dish/create', {
+    name: form.name,
+    price: form.price,
+    sort: 1,
+    code: Date.now(),
+    image: `${ossData.host}/${ossData.dir}${imageName.value}`,
+    description: form.description,
+    category_id: 114514,
+    status: 1,
+  }, {
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: `Bearer ${access}`
+    }
+  }).then((res) => {
+    ElMessage({
+      type: "success",
+      message: res.data.message
+    })
+    isShow.value = false
+  }).catch((err) => {
+    ElMessage({
+      type: "warning",
+      message: err.data.message
+    })
+  })
+}
+
+/*
 //使用oss上传图片
 const handleUpload = async () => {
   const access = localStorage.getItem('access').toString()
@@ -352,6 +385,13 @@ const handleUpload = async () => {
     })
   }
 }
+ */
+//handel submit
+const handleCreate = async () => {
+  await ossUploadService(form, createDish, generateFileName);
+  isShow.value = false //关闭窗口
+}
+
 //根据菜名查询菜品
 const searchByName = () => {
   if (value.value) {
@@ -559,12 +599,10 @@ onMounted(() => {
           <el-form-item label="描述">
             <el-input v-model="form.description" clearable placeholder="请输入菜品描述" maxlength="120" show-word-limit />
           </el-form-item>
-          <el-form-item>
-            <el-button type="primary" class="w-full" icon="Plus" @click="handleUpload">添加</el-button>
-          </el-form-item>
         </el-form>
       </div>
       <template #footer>
+        <el-button type="primary" icon="Plus" @click="handleCreate">添加</el-button>
         <el-button type="info" @click="isShow = false" icon="CircleClose">取消</el-button>
       </template>
     </el-dialog>
