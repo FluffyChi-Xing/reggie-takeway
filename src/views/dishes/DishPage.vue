@@ -29,7 +29,7 @@ const changePage = (current) => {
 const pullData = () => {
   //提取accessToken
   const access = localStorage.getItem('access').toString()
-  axios.get(`http://localhost:3000/dish/pull?pageNo=${pageNo.value}&pageSize=${pageSize}`, {
+  axios.get(`http://8.130.35.251:3005/dish/pull?pageNo=${pageNo.value}&pageSize=${pageSize}`, {
     headers: {
       Authorization: `Bearer ${access}`
     }
@@ -179,7 +179,7 @@ const updateDish = async (ossData) => {
   } else {
     sta.value = 0
   }
-  await axios.post('http://localhost:3000/dish/update', {
+  await axios.post('http://8.130.35.251:3005/dish/update', {
     name: updateForm.name,
     sort: updateForm.sort,
     price: updateForm.price,
@@ -283,7 +283,7 @@ const editRow = () => {
 const createDish = async (ossData) => {
   //access
   const access = localStorage.getItem('access').toString();
-  await axios.post('http://localhost:3000/dish/create', {
+  await axios.post('http://8.130.35.251:3005/dish/create', {
     name: form.name,
     price: form.price,
     sort: 1,
@@ -397,7 +397,7 @@ const searchByName = () => {
   if (value.value) {
     //提取access
     const access = localStorage.getItem('access').toString()
-    axios.get(`http://localhost:3000/dish/search?name=${value.value}`, {
+    axios.get(`http://8.130.35.251:3005/dish/search?name=${value.value}`, {
       headers: {
         Authorization: `Bearer ${access}`,
       },
@@ -430,7 +430,7 @@ const frozenDish = () => {
   if (currentRow.value.name) {
     //获取access
     const access = localStorage.getItem('access')
-    axios.get(`http://localhost:3000/dish/frozen?name=${currentRow.value.name}`, {
+    axios.get(`http://8.130.35.251:3005/dish/frozen?name=${currentRow.value.name}`, {
       headers: {
         Authorization: `Bearer ${access}`,
       },
@@ -459,7 +459,7 @@ const frozenDish = () => {
 const deleteRow = () => {
   //获取access
   const access = localStorage.getItem('access').toString()
-  axios.get(`http://localhost:3000/dish/delete?name=${currentRow.value.name}`, {
+  axios.get(`http://8.130.35.251:3005/dish/delete?name=${currentRow.value.name}`, {
     headers: {
       Authorization: `Bearer ${access}`,
     },

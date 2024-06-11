@@ -16,7 +16,7 @@ const form = reactive({
 
 //登录处理函数
 const login = async (username, password) => {
-  await axios.post('http://localhost:3000/employee/login', {
+  await axios.post('http://8.130.35.251:3005/employee/login', {
     username: username,
     password: password,
   }, {

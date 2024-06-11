@@ -65,7 +65,7 @@ const pullData = () => {
   //获取access
   const access = localStorage.getItem('access').toString()
   //axios
-  axios.get(`http://localhost:3000/set-meal/pull?pageNo=${pageNo.value}&pageSize=${pageSize}`, {
+  axios.get(`http://8.130.35.251:3005/set-meal/pull?pageNo=${pageNo.value}&pageSize=${pageSize}`, {
     headers: {
       Authorization: `Bearer ${access}`,
     },
@@ -100,7 +100,7 @@ const selection = ref()
 const getCate = () => {
   //获取access
   const access = localStorage.getItem('access').toString()
-  axios.get('http://localhost:3000/category/findAll', {
+  axios.get('http://8.130.35.251:3005/category/findAll', {
     headers: {
       Authorization: `Bearer ${access}`,
     },
@@ -137,7 +137,7 @@ const searchOne = () => {
   if (value.value) {
     //获取access
     const access = localStorage.getItem('access').toString();
-    axios.get(`http://localhost:3000/set-meal/search?id=${value.value}`, {
+    axios.get(`http://8.130.35.251:3005/set-meal/search?id=${value.value}`, {
       headers: {
         Authorization: `Bearer ${access}`,
       },
@@ -187,7 +187,7 @@ const generateFileName = (ossData, file) => {
 const createMeal = async (ossData) => {
   //获取access
   const access = localStorage.getItem('access').toString()
-  await axios.post('http://localhost:3000/set-meal/create', {
+  await axios.post('http://8.130.35.251:3005/set-meal/create', {
     status: editForm.status,
     name: editForm.name,
     category_id: editForm.category,
@@ -234,7 +234,7 @@ const deleteRow = () => {
   if (mealName.value.name) {
     //get access
     const access = localStorage.getItem('access').toString()
-    axios.get(`http://localhost:3000/set-meal/delete?name=${mealName.value.name}`, {
+    axios.get(`http://8.130.35.251:3005/set-meal/delete?name=${mealName.value.name}`, {
       headers: {
         Authorization: `Bearer ${access}`
       },
@@ -300,7 +300,7 @@ const submitChange = async (ossData) => {
   if (formEdit.name) {
     //access
     const access = localStorage.getItem('access').toString();
-    await axios.post('http://localhost:3000/set-meal/update', {
+    await axios.post('http://8.130.35.251:3005/set-meal/update', {
       name: formEdit.name,
       price: formEdit.price,
       category_id: formEdit.flavor,

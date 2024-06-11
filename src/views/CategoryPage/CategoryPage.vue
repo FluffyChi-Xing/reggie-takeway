@@ -49,7 +49,7 @@ const table = reactive({
 const pullData = () => {
   //access
   const access = localStorage.getItem('access').toString();
-  axios.get(`http://localhost:3000/category/pull?pageNo=${pageNo.value}&pageSize=${pageSize}`, {
+  axios.get(`http://8.130.35.251:3005/category/pull?pageNo=${pageNo.value}&pageSize=${pageSize}`, {
     headers: {
       Authorization: `Bearer ${access}`,
     },
@@ -84,7 +84,7 @@ const searchName = () => {
   if (value.value) {
     //access
     const access = localStorage.getItem('access').toString();
-    axios.get(`http://localhost:3000/category/search?id=${value.value}`, {
+    axios.get(`http://8.130.35.251:3005/category/search?id=${value.value}`, {
       headers: {
         Authorization: `Bearer ${access}`,
       },
@@ -145,7 +145,7 @@ const cateSort = [
 const handleSubmit = () => {
   //access
   const access = localStorage.getItem('access').toString();
-  axios.post('http://localhost:3000/category/create', {
+  axios.post('http://8.130.35.251:3005/category/create', {
     name: addForm.name,
     type: Number(addForm.type),
     sort: Number(addForm.sort),
@@ -187,7 +187,7 @@ const deleteRow = () => {
   if (currentPage.value.id) {
     //access
     const access = localStorage.getItem('access').toString();
-    axios.get(`http://localhost:3000/category/delete?id=${currentPage.value.id}`, {
+    axios.get(`http://8.130.35.251:3005/category/delete?id=${currentPage.value.id}`, {
       headers: {
         Authorization: `Bearer ${access}`,
       },

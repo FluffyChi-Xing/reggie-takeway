@@ -129,7 +129,7 @@ const checkLogin = async () => {
 const refreshToken = async () => {
   //提取refresh token
   const refresh = localStorage.getItem('refresh').toString()
-  await axios.get(`http://localhost:3000/employee/refresh?refresh=${refresh}`).then((res) => {
+  await axios.get(`http://8.130.35.251:3005/employee/refresh?refresh=${refresh}`).then((res) => {
     if (res.data.code === 200) {
       localStorage.setItem('access',res.data.data.access)
       localStorage.setItem('refresh',res.data.data.refresh)

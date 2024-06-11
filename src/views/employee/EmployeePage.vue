@@ -64,7 +64,7 @@ const table = reactive({
 const pullData = () => {
   //获取access
   const access = localStorage.getItem('access').toString()
-  axios.get(`http://localhost:3000/employee/pull?pageNo=${pageNo.value}&pageSize=${pageSize}`, {
+  axios.get(`http://8.130.35.251:3005/employee/pull?pageNo=${pageNo.value}&pageSize=${pageSize}`, {
     headers: {
       Authorization: `Bearer ${access}`,
     },
@@ -133,7 +133,7 @@ const searchOne = () => {
   if (value.value) {
     //获取access
     const access = localStorage.getItem('access').toString()
-    axios.get(`http://localhost:3000/employee/search?name=${value.value}`, {
+    axios.get(`http://8.130.35.251:3005/employee/search?name=${value.value}`, {
       headers: {
         Authorization: `Bearer ${access}`,
       },
@@ -198,7 +198,7 @@ const frozen = () => {
   if (currentNo.value.username) {
     //获取access
     const access = localStorage.getItem('access').toString()
-    axios.get(`http://localhost:3000/employee/frozen?user=${currentNo.value.username}`, {
+    axios.get(`http://8.130.35.251:3005/employee/frozen?user=${currentNo.value.username}`, {
       headers: {
         Authorization: `Bearer ${access}`,
       },
@@ -274,7 +274,7 @@ const updateSubmit = () => {
   if (updateEmployee.username) {
     //获取access
     const access = localStorage.getItem('access').toString()
-    axios.post('http://localhost:3000/employee/update', {
+    axios.post('http://8.130.35.251:3005/employee/update', {
       username: updateEmployee.username,
       password: updateEmployee.password,
       phone: updateEmployee.phone,

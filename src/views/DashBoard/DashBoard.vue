@@ -19,7 +19,7 @@ const unSold = ref()
 const getDishNumber = () => {
   //提取access token
   const access = localStorage.getItem('access');
-  axios.get('http://localhost:3000/dish/number', {
+  axios.get('http://8.130.35.251:3005/dish/number', {
     headers: {
       Authorization: `Bearer ${access}`,
     },
@@ -65,7 +65,7 @@ const jumpTo = (item) => {
 const getAmount = () => {
   //获取access
   const access = localStorage.getItem('access').toString()
-  axios.get('http://localhost:3000/employee/amount?employee_id=1', {
+  axios.get('http://8.130.35.251:3005/employee/amount?employee_id=1', {
     headers: {
       Authorization: `Bearer ${access}`,
     },

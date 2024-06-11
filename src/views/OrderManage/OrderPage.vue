@@ -65,7 +65,7 @@ const totalCount = ref()
 const pullData = () =>{
   //获取access
   const access = localStorage.getItem('access').toString();
-  axios.get(`http://localhost:3000/order/pull?pageNo=${pageNo.value}&pageSize=${pageSize}`, {
+  axios.get(`http://8.130.35.251:3005/order/pull?pageNo=${pageNo.value}&pageSize=${pageSize}`, {
     headers: {
       Authorization: `Bearer ${access}`,
     },
@@ -112,7 +112,7 @@ const searchOrder = () => {
   if (value.value) {
     //获取access
     const access = localStorage.getItem('access').toString()
-    axios.get(`http://localhost:3000/order/search?id=${value.value}`, {
+    axios.get(`http://8.130.35.251:3005/order/search?id=${value.value}`, {
       headers: {
         Authorization: `Bearer ${access}`,
       },
@@ -155,7 +155,7 @@ const finish = () => {
   if (currentRow.value && employee_id.value) {
     //获取access
     const access = localStorage.getItem('access').toString();
-    axios.get(`http://localhost:3000/order/finish?id=${currentRow.value.id}&employee_id=${employee_id.value}`, {
+    axios.get(`http://8.130.35.251:3005/order/finish?id=${currentRow.value.id}&employee_id=${employee_id.value}`, {
       headers: {
         Authorization: `Bearer ${access}`,
       },
@@ -193,7 +193,7 @@ const currentChange = (current) => {
 const cancelOrder = () => {
   //access
   const access = localStorage.getItem('access').toString();
-  axios.post('http://localhost:3000/order/cancel', {
+  axios.post('http://8.130.35.251:3005/order/cancel', {
     order_id: currentRow.value.id,
   }, {
     headers: {
