@@ -298,11 +298,21 @@ const createDish = async (ossData) => {
       Authorization: `Bearer ${access}`
     }
   }).then((res) => {
-    ElMessage({
-      type: "success",
-      message: res.data.message
-    })
-    isShow.value = false
+    if (res.data.code === 200) {
+      //clear table.data
+      table.data = []
+      //pull
+      pullData()
+      ElMessage({
+        type: "success",
+        message: res.data.message
+      })
+    } else {
+      ElMessage({
+        type: "warning",
+        message: res.data.message
+      })
+    }
   }).catch((err) => {
     ElMessage({
       type: "warning",
@@ -487,7 +497,11 @@ const deleteRow = () => {
 
 //dish update is show
 const updateShow = ref(false)
-
+//refresh
+const refresh = () => {
+  table.data = []
+  pullData()
+}
 
 //om
 onMounted(() => {
@@ -513,6 +527,7 @@ onMounted(() => {
             <el-input v-model="value" placeholder="请输入菜品名称..." clearable prefix-icon="Dish" style="width: 240px"/>
             <!-- search button -->
             <el-button type="primary" icon="Search" class="ml-4" @click="searchByName">搜索</el-button>
+            <el-button type="primary" icon="Refresh" class="ml-4" @click="refresh">刷新</el-button>
             <!-- add dishes -->
             <div class="w-auto h-full relative block ml-auto">
               <el-button
