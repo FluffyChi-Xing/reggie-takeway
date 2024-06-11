@@ -150,7 +150,7 @@ const searchOrder = () => {
 }
 //销单
 const currentRow = ref()
-const employee_id = ref(1)
+const employee_id = ref(3)
 const finish = () => {
   if (currentRow.value && employee_id.value) {
     //获取access

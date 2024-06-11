@@ -65,7 +65,7 @@ const jumpTo = (item) => {
 const getAmount = () => {
   //获取access
   const access = localStorage.getItem('access').toString()
-  axios.get('http://8.130.35.251:3005/employee/amount?employee_id=1', {
+  axios.get('http://8.130.35.251:3005/employee/amount?employee_id=3', {
     headers: {
       Authorization: `Bearer ${access}`,
     },
