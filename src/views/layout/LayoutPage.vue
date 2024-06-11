@@ -33,9 +33,11 @@ watch(() => store.collapse, () => {
 //om
 onMounted(() => {
   changeWidth()
-  setInterval(() => {
+  /*
+   setInterval(() => {
     checkOrder()
   }, 3000)
+   */
 })
 </script>
 
