@@ -4,7 +4,7 @@ import {ElNotification} from "element-plus";
 export const checkOrder = () => {
     //get access
     const access = localStorage.getItem('access').toString();
-    axios.get('http://8.130.35.251:3005/order/recent', {
+    axios.get('http://your-host/order/recent', {
         headers: {
           Authorization: `Bearer ${access}`,
         },
