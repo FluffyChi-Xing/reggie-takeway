@@ -2,7 +2,7 @@ import axios from "axios";
 import {ElMessage} from "element-plus";
 
 export const ossUploadService = async (item, callback = (ossData) => {}, generateFileName = (ossData, file) => {}) => {
-    await axios.get('http://8.130.35.251:3005/oss/signature').then(async (res) => {
+    await axios.get('http://your-host/oss/signature').then(async (res) => {
         ElMessage({
             type: "info",
             message: res.data.message
